@@ -1,0 +1,41 @@
+diff -rup zlib-1.2.3.orig/win32/Makefile.gcc zlib-1.2.3.new/win32/Makefile.gcc
+--- zlib-1.2.3.orig/win32/Makefile.gcc	2003-08-01 23:49:00.000000000 -0400
++++ zlib-1.2.3.new/win32/Makefile.gcc	2008-09-02 08:24:44.000000000 -0400
+@@ -45,6 +45,9 @@ ARFLAGS = rcs
+ RC = windres
+ RCFLAGS = --define GCC_WINDRES
+ 
++DLLWARP = dllwrap
++STRIP = strip
++
+ CP = cp -fp
+ # If GNU install is available, replace $(CP) with install.
+ INSTALL = $(CP)
+@@ -79,9 +82,9 @@ $(STATICLIB): $(OBJS) $(OBJA)
+ $(IMPLIB): $(SHAREDLIB)
+ 
+ $(SHAREDLIB): win32/zlib.def $(OBJS) $(OBJA) zlibrc.o
+-	dllwrap --driver-name $(CC) --def win32/zlib.def \
++	$(DLLWRAP) --driver-name $(CC) --def win32/zlib.def \
+ 	  --implib $(IMPLIB) -o $@ $(OBJS) $(OBJA) zlibrc.o
+-	strip $@
++	$(STRIP) $@
+ 
+ example: example.o $(STATICLIB)
+ 	$(LD) $(LDFLAGS) -o $@ example.o $(STATICLIB)
+@@ -104,12 +107,13 @@ zlibrc.o: win32/zlib1.rc
+ .PHONY: install uninstall clean
+ 
+ install: zlib.h zconf.h $(LIB)
+-	-@if not exist $(INCLUDE_PATH)/nul mkdir $(INCLUDE_PATH)
+-	-@if not exist $(LIBRARY_PATH)/nul mkdir $(LIBRARY_PATH)
++	-mkdir -p $(INCLUDE_PATH)
++	-mkdir -p $(LIBRARY_PATH)
+ 	-$(INSTALL) zlib.h $(INCLUDE_PATH)
+ 	-$(INSTALL) zconf.h $(INCLUDE_PATH)
+ 	-$(INSTALL) $(STATICLIB) $(LIBRARY_PATH)
+ 	-$(INSTALL) $(IMPLIB) $(LIBRARY_PATH)
++	-$(INSTALL) $(SHAREDLIB) $(BINARY_PATH)
+ 
+ uninstall:
+ 	-$(RM) $(INCLUDE_PATH)/zlib.h
